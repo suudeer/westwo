@@ -1,0 +1,246 @@
+import java.util.Calendar;
+import java.util.Scanner;
+import java.util.ArrayList;
+import java.util.List;
+class SoldOutException extends Exception {
+    public SoldOutException() {
+    }
+    public SoldOutException(String message) {
+        super(message);
+    }
+}
+
+abstract class Ingredient{
+    protected String name;
+    protected int year;
+    protected int month;
+    protected int day;
+    protected int ExpirationDate;
+    void Ingredient() {
+    }
+    @Override
+    public abstract String toString();
+}
+
+class Bubble extends Ingredient{
+    @Override
+    public String toString()
+    {
+        return "Bubble [name=" + name + ", year=" + year + ", month=" + month+ ", day=" + day + ", ExpirationDate=" + ExpirationDate+ "]";
+    }
+    public void set()
+    {
+        ExpirationDate=7;
+        name="Bubble";
+        Calendar c = Calendar.getInstance();
+        year = c.get(Calendar.YEAR);
+        month = c.get(Calendar.MONTH)+1;
+        day = c.get(Calendar.DATE);
+    }
+}
+
+class Coconut extends Ingredient{
+    @Override
+    public  String toString()
+    {
+        return "Coconut [name=" + name + ", year=" + year + ", month=" + month+ ", day=" + day + ", ExpirationDate=" + ExpirationDate+ "]";
+    }
+    public void set()
+    {
+        ExpirationDate=5;
+        name="coconut";
+        Calendar c = Calendar.getInstance();
+        year = c.get(Calendar.YEAR);
+        month = c.get(Calendar.MONTH)+1;
+        day = c.get(Calendar.DATE);
+    }
+}
+
+class MilkTea{
+    public String name;
+    public Ingredient dosing;
+    @Override
+    public String toString()
+    {
+        return "MilkTea [name=" + name + ", year=" + dosing.year + ", month=" + dosing.month+ ", day=" + dosing.day + ", ExpirationDate=" + dosing.ExpirationDate+ "]";
+    }
+}
+
+interface shop{
+    void revive(Ingredient s);
+    void sellmilktea(String names1,String names2) throws SoldOutException;
+}
+
+class TeaShop implements shop {
+    List BubbleList= new ArrayList<Bubble>();
+    List CoconutList= new ArrayList<Coconut>();
+    //ArrayList<Bubble> BubbleList = new ArrayList<Bubble>();
+    //ArrayList<Coconut> CoconutList = new ArrayList<Coconut>();
+    public void revive(Ingredient s)
+    {
+        if(s instanceof Coconut)
+        {
+            while(CoconutList.size()<20)
+            {
+                Coconut coconut=new Coconut();
+                coconut.set();
+                CoconutList.add(coconut);
+            }
+            System.out.println("Coconut已经补货完毕：");
+        }
+        else if(s instanceof Bubble)
+        {
+            while(BubbleList.size()<20)
+            {
+                Bubble bubble=new Bubble();
+                bubble.set();
+                BubbleList.add(bubble);
+            }
+            System.out.println("Bubble已经补货完毕：");
+        }
+    }
+    public void sellmilktea(String names1, String names2) throws SoldOutException
+    {
+        int num;
+        if(names2=="Coconut")
+        {
+            int flag=0;
+            int n=CoconutList.size();
+            Coconut tt=new Coconut();
+            for(num=0;num<n;)
+            {
+                tt=(Coconut)CoconutList.get(num);
+                Calendar t1 = Calendar.getInstance();
+                Calendar t2 = Calendar.getInstance();
+                t2.set(tt.year, tt.month-1, tt.day);
+                int a=differentDays(t1,t2);
+                if (a<tt.ExpirationDate)
+                {
+                    System.out.println("成功售出一杯椰果奶茶！");
+                    CoconutList.remove(num);
+                    flag=1;
+                    break;
+                }
+                else
+                {
+                    CoconutList.remove(num);
+                   if(num>=CoconutList.size())
+                   {
+                       break;
+                   }
+                }
+            }
+            if(flag==0)
+            {
+                revive(tt);
+                throw new SoldOutException("抱歉该类奶茶卖完了");
+            }
+        }
+        else if(names2=="Bubble")
+        {
+            int flag=0;
+            int n=BubbleList.size();
+            Bubble tt=new Bubble();
+            for(num=0;num<n;)
+            {
+                tt=(Bubble)BubbleList.get(num);
+                Calendar t1 = Calendar.getInstance();
+                Calendar t2 = Calendar.getInstance();
+                t2.set(tt.year, tt.month-1, tt.day);
+                int a=differentDays(t1,t2);
+                if (a<tt.ExpirationDate)
+                {
+                    System.out.println("成功售出一杯珍珠奶茶！");
+                    BubbleList.remove(num);
+                    flag=1;
+                    break;
+                }
+                else
+                {
+                    BubbleList.remove(num);
+                    if(num>=BubbleList.size())
+                    {
+                        break;
+                    }
+                }
+            }
+            if(flag==0)
+            {
+                revive(tt);
+                throw new SoldOutException("抱歉该类奶茶卖完了");
+            }
+        }
+    }
+    public  int differentDays(Calendar cal1 , Calendar cal2 )
+    {
+        int day1= cal1.get(Calendar.DAY_OF_YEAR);
+        int day2 = cal2.get(Calendar.DAY_OF_YEAR);
+        int year1 = cal1.get(Calendar.YEAR);
+        int year2 = cal2.get(Calendar.YEAR);
+        if(year1 != year2)
+        {
+            int timeDistance=0,i;
+            for(i=year1;i<year2;i++)
+            {
+                if(i%4==0&&i%100!=0||i%400==0)
+                {
+                    timeDistance+=366;
+                }
+                else
+                {
+                    timeDistance+=365;
+                }
+            }
+            return timeDistance+(day2-day1) ;
+        }
+        else
+        {
+            return day2-day1;
+        }
+    }
+}
+public class MyMilkTeaShop {
+    public static void main(String[] args) throws Exception {
+        Scanner scanner = new Scanner(System.in);
+        int i;
+        TeaShop teashop =new TeaShop();
+        Bubble bubble=new Bubble();
+        Coconut coconut=new Coconut();
+        teashop.revive(bubble);
+        teashop.revive(coconut);
+        System.out.println("请输入顾客人数：");
+        int number=scanner.nextInt();
+        for(i=0;i<number;i++)
+        {
+            System.out.println("请输入奶茶种类（Bubble/Coconut---1/2）：");
+            int s;
+            s=scanner.nextInt();
+            if(s==2)
+            {
+                try
+                {
+                    teashop.sellmilktea("milktea","Coconut");
+                }
+                catch(SoldOutException e)
+                {
+                    e.printStackTrace();
+                }
+            }
+            else if(s==1)
+            {
+                try
+                {
+                    teashop.sellmilktea("milktea","Bubble");
+                }
+                catch(SoldOutException e)
+                {
+                    e.printStackTrace();
+                }
+            }
+            else
+            {
+                System.out.println("没有该种奶茶！");
+            }
+        }
+    }
+}
